@@ -102,7 +102,7 @@ export default function Header() {
                 : "text-gray-900 hover:text-[#2fd680]"
                 }`}
             >
-              VỊ TRÍ
+             ƯU ĐÃI
             </Link>
             <Link
               to="/contact"

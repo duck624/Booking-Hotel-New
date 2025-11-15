@@ -1,456 +1,562 @@
-import React, { useState } from "react";
-import { ChevronLeft, ChevronRight, X, MapPin, Star, Wifi, Coffee, Car, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  X,
+  Gift,
+  Star,
+  Trophy,
+  Sparkles,
+  Coins,
+  CheckCircle,
+  AlertCircle,
+  Copy,
+  Ticket,
+  ChevronRight,
+  RotateCw,
+  Zap,
+  UserPlus,
+  Baby,
+  Briefcase,
+  Users,
+  Calendar,
+} from "lucide-react";
+import confetti from "canvas-confetti";
 
-const locations = [
+type Promotion = {
+  id: string;
+  title: string;
+  icon: React.ReactNode;
+  bgGradient: string;
+  shortDesc: string;
+  details: {
+    discount: string;
+    extraDiscount?: string;
+    validFrom: string;
+    validTo: string;
+    applicableRooms: string;
+    conditions: string[];
+  };
+};
+
+const promotions: Promotion[] = [
   {
-    id: 1,
-    label: "HÀ NỘI",
-    title: "HotelHub Kim Mã",
-    description:
-      "Nằm tại trung tâm khu vực Kim Mã sầm uất của Hà Nội, HotelHub Kim Mã mang đến không gian nghỉ dưỡng hiện đại và thanh lịch giữa nhịp sống thủ đô. Với thiết kế tinh tế, dịch vụ chu đáo và vị trí thuận tiện kết nối các điểm văn hóa, mua sắm và ẩm thực, đây là lựa chọn hoàn hảo cho những ai muốn trải nghiệm Hà Nội một cách trọn vẹn.",
-    image:
-      "https://cdn.pixabay.com/photo/2016/11/19/13/06/bed-1839184_1280.jpg",
+    id: "loyal",
+    title: "Khách hàng thân thiết",
+    icon: <Star className="w-10 h-10" />,
+    bgGradient: "from-amber-500 to-orange-600",
+    shortDesc: "Giảm tới 20% cho lần đặt tiếp theo",
+    details: {
+      discount: "15% – 20% (tùy hạng thành viên)",
+      extraDiscount: "Giảm thêm 10% dịch vụ Spa & Ẩm thực",
+      validFrom: "01/01/2025",
+      validTo: "31/12/2025",
+      applicableRooms: "Tất cả loại phòng",
+      conditions: [
+        "Đã đặt ≥ 5 đêm trong 12 tháng gần nhất",
+        "Hạng thành viên Silver trở lên",
+        "Áp dụng khi đặt trực tiếp trên website",
+      ],
+    },
   },
   {
-    id: 2,
-    label: "HỒ CHÍ MINH",
-    title: "HotelHub Thảo Điền",
-    description:
-      "Tọa lạc tại trung tâm Thảo Điền – khu vực sôi động bậc nhất của Thành phố Hồ Chí Minh, HotelHub Thảo Điền mang đến không gian nghỉ dưỡng hiện đại hòa cùng thiên nhiên xanh mát. Với thiết kế tinh tế, tiện nghi sang trọng và vị trí thuận lợi cho cả làm việc lẫn thư giãn, đây là điểm đến lý tưởng cho những ai muốn tận hưởng nhịp sống thành phố theo cách riêng.",
-    image:
-      "https://cdn.pixabay.com/photo/2020/03/13/18/17/the-living-room-of-a-photographer-4928794_1280.jpg",
+    id: "new",
+    title: "Khách hàng mới",
+    icon: <UserPlus className="w-10 h-10" />,
+    bgGradient: "from-teal-500 to-green-600",
+    shortDesc: "Giảm ngay 25% cho lần đặt đầu tiên",
+    details: {
+      discount: "25% cho toàn bộ hóa đơn",
+      extraDiscount: "Tặng kèm bữa sáng buffet 2 người",
+      validFrom: "Ngay khi đăng ký",
+      validTo: "30 ngày kể từ ngày đăng ký",
+      applicableRooms: "Tất cả loại phòng",
+      conditions: ["Chỉ áp dụng cho tài khoản mới", "Không áp dụng cùng ưu đãi khác"],
+    },
   },
   {
-    id: 3,
-    label: "ĐÀ NẴNG",
-    title: "HotelHub Mỹ Khê",
-    description:
-      "Nằm bên bờ biển Mỹ Khê – một trong những bãi biển đẹp nhất Đà Nẵng, HotelHub Mỹ Khê mang đến không gian nghỉ dưỡng thanh bình cùng tầm nhìn hướng biển tuyệt đẹp. Với thiết kế hiện đại, tiện nghi đẳng cấp và vị trí thuận lợi để khám phá thành phố, đây là nơi lý tưởng để tận hưởng kỳ nghỉ trọn vẹn.",
-    image:
-      "https://cdn.pixabay.com/photo/2018/03/29/17/00/bathroom-3272780_1280.jpg",
+    id: "family",
+    title: "Người già & Trẻ em",
+    icon: <Baby className="w-10 h-10" />,
+    bgGradient: "from-pink-500 to-rose-600",
+    shortDesc: "Giảm 30% cho trẻ em & người ≥ 60 tuổi",
+    details: {
+      discount: "Trẻ em dưới 12 tuổi: Miễn phí / Người ≥ 60 tuổi: Giảm 30%",
+      validFrom: "01/01/2025",
+      validTo: "31/12/2025",
+      applicableRooms: "Phòng Family & Deluxe",
+      conditions: ["Cần xuất trình giấy tờ tùy thân", "Tối đa 2 trẻ/phòng"],
+    },
   },
   {
-    id: 4,
-    label: "PHÚ QUỐC",
-    title: "HotelHub Bãi Trường",
-    description:
-      "Tọa lạc ngay bên bãi biển Bãi Trường tuyệt đẹp, HotelHub Phú Quốc là thiên đường nghỉ dưỡng lý tưởng với làn nước trong xanh và cát trắng mịn màng. Không gian sang trọng kết hợp với thiên nhiên hoang sơ tạo nên trải nghiệm đáng nhớ cho mọi du khách.",
-    image:
-      "https://cdn.pixabay.com/photo/2016/11/19/13/06/bed-1839184_1280.jpg",
+    id: "business",
+    title: "Khách công tác",
+    icon: <Briefcase className="w-10 h-10" />,
+    bgGradient: "from-indigo-500 to-purple-600",
+    shortDesc: "Giảm 20% + dịch vụ hỗ trợ doanh nghiệp",
+    details: {
+      discount: "20% giá phòng",
+      extraDiscount: "Miễn phí in ấn, hội nghị nhỏ",
+      validFrom: "Thứ 2 – Thứ 6",
+      validTo: "31/12/2025",
+      applicableRooms: "Phòng Business & Suite",
+      conditions: ["Cần giấy giới thiệu công ty hoặc danh thiếp"],
+    },
   },
   {
-    id: 5,
-    label: "NHA TRANG",
-    title: "HotelHub Trần Phú",
-    description:
-      "Nằm dọc bờ biển Trần Phú nổi tiếng, HotelHub Nha Trang mang đến tầm nhìn panorama tuyệt đẹp ra biển cả. Với thiết kế hiện đại, tiện nghi cao cấp và dịch vụ tận tâm, đây là điểm dừng chân hoàn hảo cho kỳ nghỉ biển.",
-    image:
-      "https://cdn.pixabay.com/photo/2016/11/19/13/06/bed-1839184_1280.jpg",
+    id: "group",
+    title: "Đặt nhóm (≥ 5 phòng)",
+    icon: <Users className="w-10 h-10" />,
+    bgGradient: "from-cyan-500 to-blue-600",
+    shortDesc: "Giảm tới 35% khi đặt nhiều phòng",
+    details: {
+      discount: "5–9 phòng: 25% | ≥ 10 phòng: 35%",
+      extraDiscount: "Tặng 1 phòng miễn phí cho trưởng nhóm",
+      validFrom: "01/01/2025",
+      validTo: "31/12/2025",
+      applicableRooms: "Tất cả loại phòng",
+      conditions: ["Thanh toán trước 50%", "Đặt trước ít nhất 14 ngày"],
+    },
   },
   {
-    id: 6,
-    label: "ĐÀ LẠT",
-    title: "HotelHub Xuân Hương",
-    description:
-      "Nép mình bên hồ Xuân Hương thơ mộng, HotelHub Đà Lạt là không gian nghỉ dưỡng yên bình giữa thành phố ngàn hoa. Khí hậu mát mẻ quanh năm cùng thiết kế ấm cúng tạo nên nơi trú ẩn lý tưởng khỏi guồng quay cuộc sống.",
-    image:
-      "https://cdn.pixabay.com/photo/2016/11/19/13/06/bed-1839184_1280.jpg",
+    id: "season",
+    title: "Ưu đãi theo mùa",
+    icon: <Calendar className="w-10 h-10" />,
+    bgGradient: "from-emerald-500 to-lime-600",
+    shortDesc: "Giảm tới 40% các dịp lễ, Tết",
+    details: {
+      discount: "30% – 40% tùy dịp",
+      validFrom: "Tết Nguyên Đán, 30/4, 2/9, Noel",
+      validTo: "Theo từng dịp",
+      applicableRooms: "Tất cả loại phòng",
+      conditions: ["Số lượng có hạn", "Không hoàn, không hủy"],
+    },
   },
 ];
 
-const places = [
-  {
-    id: 1,
-    name: "Hanoi",
-    desc: "Thủ đô với nhiều điểm tham quan.",
-    img: "https://cellphones.com.vn/sforum/wp-content/uploads/2024/01/dia-diem-du-lich-o-ha-noi-1.jpg",
-    rooms: [
-      {
-        id: 1,
-        name: "Phòng View Hồ Hoàn Kiếm",
-        view: "Nhìn ra Hồ Hoàn Kiếm",
-        location: "Trung tâm thành phố",
-        price: 2500000,
-        image: "https://cdn.pixabay.com/photo/2016/11/19/13/06/bed-1839184_1280.jpg",
-        amenities: ["Wifi miễn phí", "Breakfast", "Gym", "Bãi đỗ xe"],
-        rating: 4.8
-      },
-      {
-        id: 2,
-        name: "Phòng View Phố Cổ",
-        view: "Nhìn ra Phố Cổ Hà Nội",
-        location: "Khu phố cổ",
-        price: 2000000,
-        image: "https://cdn.pixabay.com/photo/2020/03/13/18/17/the-living-room-of-a-photographer-4928794_1280.jpg",
-        amenities: ["Wifi miễn phí", "Breakfast", "Mini bar"],
-        rating: 4.7
-      },
-      {
-        id: 3,
-        name: "Phòng View Đường Lớn",
-        view: "Nhìn ra đại lộ Kim Mã",
-        location: "Gần trung tâm thương mại",
-        price: 1800000,
-        image: "https://cdn.pixabay.com/photo/2018/03/29/17/00/bathroom-3272780_1280.jpg",
-        amenities: ["Wifi miễn phí", "Breakfast", "Bãi đỗ xe"],
-        rating: 4.5
-      }
-    ]
-  },
-  {
-    id: 2,
-    name: "Da Nang",
-    desc: "Bãi biển đẹp và cầu Rồng.",
-    img: "https://vcdn1-dulich.vnecdn.net/2022/06/03/cauvang-1654247842-9403-1654247849.jpg?w=1200&h=0&q=100&dpr=1&fit=crop&s=Swd6JjpStebEzT6WARcoOA",
-    rooms: [
-      {
-        id: 4,
-        name: "Phòng View Biển Mỹ Khê",
-        view: "Nhìn ra biển Mỹ Khê",
-        location: "Bãi biển Mỹ Khê",
-        price: 3000000,
-        image: "https://cdn.pixabay.com/photo/2016/11/19/13/06/bed-1839184_1280.jpg",
-        amenities: ["Wifi miễn phí", "Breakfast", "Hồ bơi", "Spa"],
-        rating: 4.9
-      },
-      {
-        id: 5,
-        name: "Phòng View Sông Hàn",
-        view: "Nhìn ra sông Hàn và Cầu Rồng",
-        location: "Bờ sông Hàn",
-        price: 2800000,
-        image: "https://cdn.pixabay.com/photo/2020/03/13/18/17/the-living-room-of-a-photographer-4928794_1280.jpg",
-        amenities: ["Wifi miễn phí", "Breakfast", "Rooftop bar"],
-        rating: 4.8
-      },
-      {
-        id: 6,
-        name: "Phòng View Đường Biển",
-        view: "Nhìn ra đường Võ Nguyên Giáp",
-        location: "Gần bãi biển",
-        price: 2200000,
-        image: "https://cdn.pixabay.com/photo/2018/03/29/17/00/bathroom-3272780_1280.jpg",
-        amenities: ["Wifi miễn phí", "Breakfast", "Gym"],
-        rating: 4.6
-      }
-    ]
-  },
-  {
-    id: 3,
-    name: "Ho Chi Minh",
-    desc: "Thành phố sôi động, ẩm thực phong phú.",
-    img: "https://cdn.thuvienphapluat.vn//uploads/tintuc/2024/05/01/vung-do-thi-thanh-pho-ho-chi-minh.jpg",
-    rooms: [
-      {
-        id: 7,
-        name: "Phòng View Sông Sài Gòn",
-        view: "Nhìn ra sông Sài Gòn",
-        location: "Quận 2 - Thảo Điền",
-        price: 2700000,
-        image: "https://cdn.pixabay.com/photo/2016/11/19/13/06/bed-1839184_1280.jpg",
-        amenities: ["Wifi miễn phí", "Breakfast", "Hồ bơi", "Sky bar"],
-        rating: 4.9
-      },
-      {
-        id: 8,
-        name: "Phòng View Trung Tâm",
-        view: "Nhìn ra Quận 1",
-        location: "Trung tâm Quận 1",
-        price: 2500000,
-        image: "https://cdn.pixabay.com/photo/2020/03/13/18/17/the-living-room-of-a-photographer-4928794_1280.jpg",
-        amenities: ["Wifi miễn phí", "Breakfast", "Rooftop pool"],
-        rating: 4.7
-      },
-      {
-        id: 9,
-        name: "Phòng View Đại Lộ",
-        view: "Nhìn ra đại lộ Nguyễn Văn Linh",
-        location: "Quận 7",
-        price: 2000000,
-        image: "https://cdn.pixabay.com/photo/2018/03/29/17/00/bathroom-3272780_1280.jpg",
-        amenities: ["Wifi miễn phí", "Breakfast", "Bãi đỗ xe"],
-        rating: 4.5
-      }
-    ]
-  },
+// Dữ liệu vòng quay
+const wheelPrizes = [
+  { label: "500 điểm", value: 500, color: "#10b981" },
+  { label: "200 điểm", value: 200, color: "#3b82f6" },
+  { label: "1.000 điểm", value: 1000, color: "#f59e0b" },
+  { label: "300 điểm", value: 300, color: "#8b5cf6" },
+  { label: "Voucher 500k", value: 500000, color: "#ef4444", isVoucher: true },
+  { label: "100 điểm", value: 100, color: "#06b6d4" },
+  { label: "2.000 điểm", value: 2000, color: "#f97316" },
+  { label: "Chúc may mắn", value: 0, color: "#6b7280" },
 ];
 
-export default function Locations() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedCity, setSelectedCity] = useState<typeof places[0] | null>(null);
-  const [showRoomModal, setShowRoomModal] = useState(false);
+// Câu hỏi quiz
+const quizQuestions = [
+  { q: "Khách sạn M Village hiện có bao nhiêu cơ sở?", a: "6", options: ["3", "6", "9", "12"] },
+  { q: "Ưu đãi khách hàng mới giảm bao nhiêu %?", a: "25%", options: ["15%", "20%", "25%", "30%"] },
+  { q: "1 điểm thưởng đổi được bao nhiêu tiền?", a: "100 ₫", options: ["50 ₫", "100 ₫", "200 ₫", "500 ₫"] },
+];
 
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? locations.length - 1 : prev - 1));
+export default function PromotionsPage() {
+  const [points, setPoints] = useState<number>(() => Number(localStorage.getItem("mVillagePoints") || "1250"));
+  const [selectedPromo, setSelectedPromo] = useState<Promotion | null>(null);
+  const [customerId, setCustomerId] = useState("");
+  const [promoCode, setPromoCode] = useState<string | null>(null);
+  const [codeMessage, setCodeMessage] = useState("");
+
+  // Vòng quay
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [rotation, setRotation] = useState(0);
+  const lastSpinDate = localStorage.getItem("lastSpinDate") || "";
+
+  // Quiz
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [currentQ, setCurrentQ] = useState(0);
+  const [selectedAns, setSelectedAns] = useState<string | null>(null);
+  const [quizScore, setQuizScore] = useState(0);
+  const quizDone = localStorage.getItem("quizCompleted") === "true";
+
+  // Bốc thăm
+  const [showLuckyDraw, setShowLuckyDraw] = useState(false);
+  const [drawResult, setDrawResult] = useState<string | null>(null);
+
+  // Lưu điểm
+  useEffect(() => {
+    localStorage.setItem("mVillagePoints", points.toString());
+  }, [points]);
+
+  // Kiểm tra có được quay hôm nay chưa
+  const canSpinToday = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    return lastSpinDate !== today;
   };
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev === locations.length - 1 ? 0 : prev + 1));
+  // Vòng quay
+  const spinWheel = () => {
+    if (isSpinning || !canSpinToday()) return;
+
+    setIsSpinning(true);
+    const spins = 5 + Math.random() * 4;
+    const prizeIndex = Math.floor(Math.random() * wheelPrizes.length);
+    const prize = wheelPrizes[prizeIndex];
+    const deg = spins * 360 + prizeIndex * (360 / wheelPrizes.length) + 360 / (wheelPrizes.length * 2);
+
+    setRotation(prev => prev + deg);
+
+    setTimeout(() => {
+      setIsSpinning(false);
+      localStorage.setItem("lastSpinDate", new Date().toISOString().slice(0, 10));
+
+      if (prize.value > 0) {
+        setPoints(p => p + (prize.isVoucher ? 0 : prize.value));
+        confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+      }
+
+      alert(`Chúc mừng! Bạn nhận được: ${prize.label}${prize.isVoucher ? " (đã gửi qua email)" : ""}`);
+    }, 5200);
   };
 
-  const handleViewDetails = (city: typeof places[0]) => {
-    setSelectedCity(city);
-    setShowRoomModal(true);
+  // Quiz
+  const handleQuizAnswer = () => {
+    if (selectedAns === quizQuestions[currentQ].a) {
+      setQuizScore(prev => prev + 200);
+    }
+
+    if (currentQ < quizQuestions.length - 1) {
+      setCurrentQ(prev => prev + 1);
+      setSelectedAns(null);
+    } else {
+      const total = quizScore + (selectedAns === quizQuestions[currentQ].a ? 200 : 0);
+      setPoints(p => p + total);
+      localStorage.setItem("quizCompleted", "true");
+      confetti({ particleCount: 150, spread: 100 });
+      alert(`Hoàn thành! Bạn nhận được ${total} điểm thưởng!`);
+      setShowQuiz(false);
+    }
   };
 
-  const handleBookNow = () => {
-    window.dispatchEvent(new Event("openBooking"));
+  // Bốc thăm
+  const startLuckyDraw = () => {
+    const prizes = [
+      "Voucher 1.000.000 ₫",
+      "500 điểm",
+      "Voucher 500.000 ₫",
+      "300 điểm",
+      "Chúc may mắn lần sau!",
+    ];
+    const result = prizes[Math.floor(Math.random() * prizes.length)];
+    setDrawResult(result);
+
+    if (result.includes("điểm")) {
+      const pts = parseInt(result.replace(/\D/g, ""));
+      setPoints(p => p + pts);
+    }
+    confetti({ particleCount: 200, spread: 120, origin: { y: 0.5 } });
   };
+
+  // Nhận mã ưu đãi
+  const generateCode = () => {
+    if (!customerId.trim()) return setCodeMessage("Vui lòng nhập ID");
+
+    const valid = ["MV2024", "GOLD123", "VIP888", "NEW2025"];
+    if (valid.includes(customerId.toUpperCase())) {
+      const code = `MV${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      setPromoCode(code);
+      setCodeMessage("Chúc mừng! Mã ưu đãi của bạn:");
+    } else {
+      setPromoCode(null);
+      setCodeMessage("Rất tiếc, ID chưa đủ điều kiện");
+    }
+  };
+
+  const copyCode = () => promoCode && navigator.clipboard.writeText(promoCode);
 
   return (
     <>
-      {/* ==================== SLIDER ĐẦU TRANG ==================== */}
-      <div className="relative w-full h-screen overflow-hidden">
+      {/* HERO */}
+      <div className="relative h-screen w-full overflow-hidden flex items-center justify-center">
+        {/* Ảnh nền */}
         <div
-          className="absolute inset-0 bg-cover bg-center transition-all duration-700"
-          style={{ backgroundImage: `url(${locations[currentIndex].image})` }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80')`,
+          }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
 
-        <div className="relative z-10 flex flex-col items-center justify-center h-full text-white px-4">
-          <h1 className="text-5xl md:text-7xl font-bold mb-12 text-center drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] leading-tight">
-            Khám phá điều mới lạ
-            <br />
-            tại M Village
+        {/* Overlay tối + hiệu ứng mờ nhẹ */}
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
+
+        {/* Nội dung – siêu tối giản & sang */}
+        <div className="relative z-10 text-center text-white px-6 max-w-5xl mx-auto">
+          {/* Dòng đầu tiên – siêu to, siêu mỏng, siêu sang */}
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tight leading-none">
+            <span className="block text-white/95">Ưu đãi</span>
+            <span className="block text-amber-400 drop-shadow-2xl">Đặc biệt</span>
           </h1>
 
-          <div className="flex items-center gap-6 w-full max-w-6xl">
-            <Button
-              onClick={handlePrev}
-              variant="outline"
-              size="icon"
-              className="text-white bg-white/20 hover:bg-white/40 border-2 border-white/50 backdrop-blur-md shrink-0 h-14 w-14 rounded-full shadow-xl hover:scale-110 transition-all duration-300"
-            >
-              <ChevronLeft className="h-8 w-8" />
-            </Button>
+          {/* Dòng phụ – nhỏ hơn, thanh lịch */}
+          <p className="mt-8 text-xl md:text-3xl lg:text-4xl font-light tracking-wider text-white/90">
+            Chơi vui — Nhận quà thật
+          </p>
 
-            <div className="flex-1 overflow-hidden">
-              <div
-                className="flex transition-transform duration-500 ease-in-out"
-                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-              >
-                {locations.map((location) => (
-                  <div key={location.id} className="min-w-full flex flex-col items-center px-4">
-                    <div className="bg-black/40 backdrop-blur-md rounded-2xl p-8 max-w-3xl border border-white/20 shadow-2xl flex flex-col items-center">
-                      <span className="inline-block bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-sm font-bold tracking-wider mb-4 border border-white/30">
-                        {location.label}
-                      </span>
-                      <h2 className="text-4xl font-bold mb-6 drop-shadow-lg text-center">
-                        {location.title}
-                      </h2>
-                      <p className="text-center text-base leading-relaxed mb-8 drop-shadow-md font-medium">
-                        {location.description}
-                      </p>
-                      <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold px-8 py-6 text-lg rounded-full shadow-2xl hover:shadow-blue-500/50 hover:scale-105 transition-all duration-300 border-2 border-white/20">
-                        Khám phá ngay
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Button
-              onClick={handleNext}
-              variant="outline"
-              size="icon"
-              className="text-white bg-white/20 hover:bg-white/40 border-2 border-white/50 backdrop-blur-md shrink-0 h-14 w-14 rounded-full shadow-xl hover:scale-110 transition-all duration-300"
-            >
-              <ChevronRight className="h-8 w-8" />
-            </Button>
+          {/* Icon nhỏ nhấp nháy nhẹ ở dưới làm điểm nhấn */}
+          <div className="mt-12 flex justify-center">
+            <Sparkles className="w-16 h-16 text-amber-400 animate-pulse" />
           </div>
 
-          <div className="flex gap-3 mt-12 bg-black/30 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20">
-            {locations.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`h-3 rounded-full transition-all duration-300 ${
-                  index === currentIndex
-                    ? "bg-white w-12 shadow-lg shadow-white/50"
-                    : "bg-white/40 w-3 hover:bg-white/70"
-                }`}
-              />
-            ))}
-          </div>
+          {/* Đường viền vàng mỏng chạy ngang – cực kỳ sang */}
+          <div className="mt-16 w-32 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto rounded-full" />
+        </div>
+
+        {/* Nút cuộn xuống (tùy chọn thêm cho sang) */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
+          <ChevronRight className="w-10 h-10 text-amber-400 rotate-90" />
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="h-2 bg-gradient-to-r from-teal-500 via-green-500 to-emerald-500"></div>
-
-      {/* ==================== ĐIỂM ĐẾN PHỔ BIẾN ==================== */}
-      <div className="relative bg-gray-50 py-24 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <div className="inline-block bg-teal-100 px-6 py-2 rounded-full mb-6 border border-teal-200">
-              <span className="text-teal-700 font-bold text-sm tracking-widest">ĐIỂM ĐẾN</span>
-            </div>
-            <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">Điểm đến phổ biến</h2>
-            <p className="text-gray-600 text-xl font-medium">
-              Khám phá những thành phố hấp dẫn nhất Việt Nam
-            </p>
+      {/* NHẬN MÃ THEO ID */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-4xl font-bold mb-8">Nhập ID nhận mã ưu đãi</h2>
+          <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+            <input
+              type="text"
+              value={customerId}
+              onChange={(e) => setCustomerId(e.target.value)}
+              placeholder="VD: MV2024"
+              className="flex-1 px-6 py-4 rounded-xl border-2 focus:border-teal-500 outline-none text-lg"
+            />
+            <button
+              onClick={generateCode}
+              className="bg-gradient-to-r from-teal-500 to-green-500 text-white font-bold px-8 py-4 rounded-xl hover:scale-105 transition-all flex items-center gap-2 shadow-lg"
+            >
+              <Gift className="w-6 h-6" /> Nhận mã
+            </button>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {places.map((p, index) => (
-              <div
-                key={p.id}
-                className="group relative bg-white rounded-3xl overflow-hidden border-2 border-gray-200 hover:border-teal-500 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-4"
-                style={{ animationDelay: `${index * 150}ms` }}
-              >
-                <div className="relative overflow-hidden h-80">
-                  <img
-                    src={p.img}
-                    alt={p.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-8">
-                    <h3 className="text-4xl font-bold text-white drop-shadow-2xl">{p.name}</h3>
-                    <p className="text-white/90 mt-2 text-lg font-medium">{p.desc}</p>
+          {codeMessage && (
+            <div className={`mt-8 p-6 rounded-2xl flex items-center gap-4 ${promoCode ? "bg-green-50 border-2 border-green-300" : "bg-red-50 border-2 border-red-300"}`}>
+              {promoCode ? <CheckCircle className="w-12 h-12 text-green-600" /> : <AlertCircle className="w-12 h-12 text-red-600" />}
+              <div>
+                <p className={promoCode ? "text-green-800 font-bold text-xl" : "text-red-800 font-bold text-xl"}>{codeMessage}</p>
+                {promoCode && (
+                  <div className="mt-4 flex items-center gap-4">
+                    <code className="bg-white px-6 py-3 rounded-lg font-mono text-3xl border-2 border-teal-500">{promoCode}</code>
+                    <button onClick={copyCode} className="text-teal-600 hover:text-teal-800 flex items-center gap-2">
+                      <Copy className="w-6 h-6" /> Copy
+                    </button>
                   </div>
-                </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
 
-                <div className="p-8 bg-white">
+      {/* 6 ƯU ĐÃI */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-5xl font-bold text-center mb-16">Chương trình ưu đãi</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {promotions.map(promo => (
+              <div key={promo.id} className="group bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all hover:-translate-y-4 border">
+                <div className={`h-40 bg-gradient-to-br ${promo.bgGradient} flex items-center justify-center text-white`}>
+                  {promo.icon}
+                </div>
+                <div className="p-8">
+                  <h3 className="text-2xl font-bold mb-3">{promo.title}</h3>
+                  <p className="text-gray-600 mb-6">{promo.shortDesc}</p>
                   <button
-                    onClick={() => handleViewDetails(p)}
-                    className="w-full flex items-center justify-center gap-3 font-bold py-5 px-6 rounded-xl text-white bg-gradient-to-r from-teal-500 to-green-500 hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-lg"
+                    onClick={() => setSelectedPromo(promo)}
+                    className="w-full bg-gradient-to-r from-teal-500 to-green-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-all flex items-center justify-center gap-2"
                   >
-                    Xem chi tiết
+                    Xem chi tiết <ChevronRight className="w-5 h-5" />
                   </button>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ==================== MODAL CHI TIẾT PHÒNG - SCROLLBAR ĐẸP ==================== */}
-      {showRoomModal && selectedCity && (
-        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-          <div
-            className="bg-white rounded-3xl shadow-2xl max-w-6xl w-full max-h-[90vh] relative overflow-hidden flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header cố định */}
-            <div className="bg-gradient-to-r from-teal-600 to-green-600 px-8 py-10 sticky top-0 z-20 flex-shrink-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-4xl font-bold text-white">
-                    Khách sạn tại {selectedCity.name}
-                  </h2>
-                  <p className="text-white/90 mt-2 text-lg">
-                    {selectedCity.rooms.length} loại phòng cao cấp đang chờ bạn
-                  </p>
+      {/* TRÒ CHƠI TÍCH ĐIỂM */}
+      <section className="py-20 bg-gradient-to-br from-teal-50 to-green-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-5xl font-bold text-center mb-12">Chơi ngay – Nhận quà liền tay!</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+
+            {/* VÒNG QUAY MAY MẮN */}
+            <div className="bg-white rounded-3xl p-10 shadow-2xl text-center">
+              <Trophy className="w-20 h-20 text-yellow-500 mx-auto mb-6" />
+              <h3 className="text-3xl font-bold mb-4">Vòng quay may mắn</h3>
+              <p className="text-gray-600 mb-8">1 lượt miễn phí mỗi ngày</p>
+              <div className="relative w-80 h-80 mx-auto mb-8">
+                <div className="absolute inset-0 rounded-full overflow-hidden shadow-2xl">
+                  <svg viewBox="0 0 320 320" className="w-full h-full" style={{ transform: `rotate(${rotation}deg)`, transition: isSpinning ? "transform 5.2s cubic-bezier(0.17, 0.67, 0.12, 0.99)" : "none" }}>
+                    {wheelPrizes.map((prize, i) => {
+                      const angle = (360 / wheelPrizes.length) * i;
+                      return (
+                        <g key={i}>
+                          <path
+                            d={`M160,160 L${160 + 150 * Math.cos((angle - 90) * Math.PI / 180)},${160 + 150 * Math.sin((angle - 90) * Math.PI / 180)} A150,150 0 0 1 ${160 + 150 * Math.cos((angle + 360 / wheelPrizes.length - 90) * Math.PI / 180)},${160 + 150 * Math.sin((angle + 360 / wheelPrizes.length - 90) * Math.PI / 180)} Z`}
+                            fill={prize.color}
+                          />
+                          <text x="160" y="40" fill="white" fontSize="16" fontWeight="bold" textAnchor="middle" transform={`rotate(${angle + 22.5} 160 160)`}>
+                            {prize.label}
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </svg>
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 w-0 h-0 border-l-12 border-r-12 border-t-24 border-l-transparent border-r-transparent border-t-yellow-400"></div>
                 </div>
-                <button
-                  onClick={() => setShowRoomModal(false)}
-                  className="bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-all hover:rotate-90"
-                >
-                  <X className="w-7 h-7" />
-                </button>
               </div>
+              <button
+                onClick={spinWheel}
+                disabled={isSpinning || !canSpinToday()}
+                className={`w-full py-6 rounded-xl font-bold text-xl text-white transition-all ${(isSpinning || !canSpinToday()) ? "bg-gray-400" : "bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-105 shadow-2xl"}`}
+              >
+                {isSpinning ? "Đang quay..." : canSpinToday() ? "Quay ngay!" : "Đã quay hôm nay"}
+              </button>
             </div>
 
-            {/* Nội dung cuộn - có scrollbar đẹp */}
-            <div className="flex-1 overflow-y-auto px-8 py-10 custom-scrollbar">
-              <div className="space-y-10 pb-8">
-                {selectedCity.rooms.map((room) => (
-                  <div
-                    key={room.id}
-                    className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl overflow-hidden border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-                  >
-                    <div className="grid lg:grid-cols-3 gap-0">
-                      {/* Ảnh */}
-                      <div className="relative h-80 lg:h-auto overflow-hidden">
-                        <img
-                          src={room.image}
-                          alt={room.name}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-sm text-teal-600 px-4 py-2 rounded-full flex items-center gap-2 font-bold shadow-lg">
-                          <Star className="w-5 h-5 fill-teal-600" />
-                          {room.rating}
-                        </div>
-                      </div>
+            {/* TRẢ LỜI CÂU HỎI */}
+            <div className="bg-white rounded-3xl p-10 shadow-2xl text-center">
+              <Sparkles className="w-20 h-20 text-purple-500 mx-auto mb-6" />
+              <h3 className="text-3xl font-bold mb-4">Trả lời câu hỏi</h3>
+              <p className="text-gray-600 mb-8">Nhận tới 600 điểm</p>
+              {quizDone ? (
+                <div className="text-green-600 font-bold text-2xl">Đã hoàn thành!</div>
+              ) : (
+                <button
+                  onClick={() => setShowQuiz(true)}
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-6 rounded-xl hover:scale-105 transition-all shadow-2xl text-xl"
+                >
+                  Bắt đầu ngay
+                </button>
+              )}
+            </div>
 
-                      {/* Nội dung */}
-                      <div className="lg:col-span-2 p-8 lg:p-12 flex flex-col justify-between">
-                        <div>
-                          <h3 className="text-3xl font-bold text-gray-900 mb-4">{room.name}</h3>
-                          <div className="flex flex-wrap items-center gap-6 text-gray-700 mb-6">
-                            <div className="flex items-center gap-2">
-                              <MapPin className="w-5 h-5 text-teal-600" />
-                              <span className="font-medium">{room.location}</span>
-                            </div>
-                            <span className="hidden lg:block text-gray-400">•</span>
-                            <span className="font-medium">{room.view}</span>
-                          </div>
+            {/* BỐC THĂM */}
+            <div className="bg-white rounded-3xl p-10 shadow-2xl text-center">
+              <Gift className="w-20 h-20 text-pink-500 mx-auto mb-6" />
+              <h3 className="text-3xl font-bold mb-4">Bốc thăm trúng thưởng</h3>
+              <p className="text-gray-600 mb-8">Cơ hội trúng voucher 1 triệu</p>
+              <button
+                onClick={() => setShowLuckyDraw(true)}
+                className="w-full bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold py-6 rounded-xl hover:scale-105 transition-all shadow-2xl text-xl"
+              >
+                Bốc thăm ngay
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                          <div className="flex flex-wrap gap-3 mb-8">
-                            {room.amenities.map((a, i) => (
-                              <span
-                                key={i}
-                                className="bg-teal-50 text-teal-700 px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2"
-                              >
-                                {a === "Wifi miễn phí" && <Wifi className="w-4 h-4" />}
-                                {a === "Breakfast" && <Coffee className="w-4 h-4" />}
-                                {a === "Bãi đỗ xe" && <Car className="w-4 h-4" />}
-                                {a}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
+      {/* ĐIỂM THƯỞNG */}
+      <section className="py-20 bg-gray-100">
+        <div className="max-w-5xl mx-auto px-6">
+          <h2 className="text-5xl font-bold text-center mb-12">Điểm thưởng của bạn</h2>
+          <div className="bg-gradient-to-r from-teal-600 to-green-600 rounded-3xl p-12 text-white text-center shadow-2xl">
+            <p className="text-3xl mb-6">Tổng điểm hiện tại</p>
+            <p className="text-8xl font-bold flex items-center justify-center gap-6">
+              <Coins className="w-24 h-24" />
+              {points.toLocaleString()}
+            </p>
+            <p className="text-3xl mt-8">= {(points * 100).toLocaleString("vi-VN")} ₫</p>
+          </div>
+        </div>
+      </section>
 
-                        <div className="flex flex-col sm:flex-row items-end justify-between gap-6">
-                          <div>
-                            <p className="text-gray-600 text-sm">Giá mỗi đêm từ</p>
-                            <p className="text-4xl font-bold text-teal-600">
-                              {room.price.toLocaleString("vi-VN")} ₫
-                            </p>
-                          </div>
-                          <button
-                            onClick={handleBookNow}
-                            className="flex items-center justify-center gap-3 font-bold text-white bg-gradient-to-r from-teal-500 to-green-500 hover:shadow-2xl hover:scale-105 transition-all duration-300 py-5 px-10 rounded-xl shadow-xl"
-                          >
-                            <Check className="w-6 h-6" />
-                            Đặt phòng ngay
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+      {/* MODAL CHI TIẾT ƯU ĐÃI */}
+      {selectedPromo && (
+        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-md flex items-center justify-center p-4" onClick={() => setSelectedPromo(null)}>
+          <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className={`h-48 bg-gradient-to-br ${selectedPromo.bgGradient} flex items-center justify-center text-white relative`}>
+              {selectedPromo.icon}
+              <button onClick={() => setSelectedPromo(null)} className="absolute top-6 right-6 bg-white/20 hover:bg-white/30 p-3 rounded-full">
+                <X className="w-7 h-7" />
+              </button>
+            </div>
+            <div className="p-10">
+              <h2 className="text-4xl font-bold mb-6">{selectedPromo.title}</h2>
+              <div className="space-y-6 text-lg">
+                <p className="text-3xl font-bold text-teal-600">{selectedPromo.details.discount}</p>
+                {selectedPromo.details.extraDiscount && <p className="text-green-600 font-medium">{selectedPromo.details.extraDiscount}</p>}
+                <div className="grid grid-cols-2 gap-6">
+                  <div><p className="text-gray-600">Từ ngày</p><p className="font-bold">{selectedPromo.details.validFrom}</p></div>
+                  <div><p className="text-gray-600">Đến ngày</p><p className="font-bold">{selectedPromo.details.validTo}</p></div>
+                </div>
+                <div><p className="text-gray-600 mb-2">Áp dụng cho</p><p className="font-bold">{selectedPromo.details.applicableRooms}</p></div>
+                <div>
+                  <p className="font-bold mb-3">Điều kiện:</p>
+                  <ul className="space-y-2">
+                    {selectedPromo.details.conditions.map((c, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <Ticket className="w-5 h-5 text-teal-600 mt-0.5" />
+                        {c}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
+              <button onClick={() => setSelectedPromo(null)} className="mt-10 w-full bg-gradient-to-r from-teal-500 to-green-500 text-white font-bold py-5 rounded-xl hover:scale-105 transition-all">
+                Đóng
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* =============== STYLE SCROLLBAR ĐẸP (tự động áp dụng toàn cục) =============== */}
-      <style jsx global>{`
-        .custom-scrollbar {
-          scrollbar-width: thin;
-          scrollbar-color: #94a3b8 #f1f5f9;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f5f9;
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: linear-gradient(to bottom, #94a3b8, #64748b);
-          border-radius: 10px;
-          border: 2px solid #f1f5f9;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(to bottom, #64748b, #475569);
-        }
-      `}</style>
+      {/* MODAL QUIZ */}
+      {showQuiz && (
+        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-10">
+            <h3 className="text-3xl font-bold mb-8 text-center">Câu {currentQ + 1} / {quizQuestions.length}</h3>
+            <p className="text-2xl text-center mb-10">{quizQuestions[currentQ].q}</p>
+            <div className="grid grid-cols-2 gap-6">
+              {quizQuestions[currentQ].options.map(opt => (
+                <button
+                  key={opt}
+                  onClick={() => setSelectedAns(opt)}
+                  className={`py-6 rounded-2xl border-4 text-xl font-medium transition-all ${selectedAns === opt ? "border-teal-500 bg-teal-50" : "border-gray-300 hover:border-teal-400"}`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={handleQuizAnswer}
+              disabled={!selectedAns}
+              className="mt-10 w-full bg-gradient-to-r from-teal-500 to-green-500 text-white font-bold py-6 rounded-xl disabled:opacity-50 text-xl"
+            >
+              {currentQ === quizQuestions.length - 1 ? "Hoàn thành" : "Tiếp theo"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL BỐC THĂM */}
+      {showLuckyDraw && (
+        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-12 text-center">
+            {drawResult ? (
+              <>
+                <Trophy className="w-28 h-28 text-yellow-500 mx-auto mb-6" />
+                <h3 className="text-5xl font-bold mb-6">Chúc mừng!</h3>
+                <p className="text-3xl text-teal-600">{drawResult}</p>
+              </>
+            ) : (
+              <>
+                <Gift className="w-28 h-28 text-pink-500 mx-auto mb-10 animate-bounce" />
+                <button
+                  onClick={startLuckyDraw}
+                  className="bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold text-3xl py-10 px-20 rounded-3xl hover:scale-110 transition-all shadow-2xl"
+                >
+                  BỐC THĂM NGAY
+                </button>
+              </>
+            )}
+            <button onClick={() => { setShowLuckyDraw(false); setDrawResult(null); }} className="mt-10 text-gray-600 hover:underline text-lg">
+              Đóng
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
