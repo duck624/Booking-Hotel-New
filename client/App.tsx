@@ -10,7 +10,7 @@ import Home from "./pages/Home";
 import RoomSystem from "./pages/Room_System";
 import Services from "./pages/Service";
 import Food from "./pages/Food";
-import Locations from "./pages/Location";
+import Locations from "./pages/Promotion";
 import Contact from "./pages/Contact";
 import Header from "./components/Header";
 import Footer from "./components/Footer";

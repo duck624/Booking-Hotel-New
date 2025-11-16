@@ -145,8 +145,6 @@ const ServiceModal = ({
         fixed inset-0 flex items-center justify-center p-4
         transition-opacity duration-300 ease-out
         ${isVisible ? 'opacity-100' : 'opacity-0'}
-        
-        z-[9999] // SỬA TỪ z-50 THÀNH z-[9999] (CAO HƠN HEADER)
       `}
       style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
     >
