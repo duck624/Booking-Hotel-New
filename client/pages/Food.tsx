@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useInView } from "react-intersection-observer";
 
@@ -36,7 +36,7 @@ const PageBanner = ({
    }, [imageUrls.length]);
 
    return (
-      <div className="relative w-full h-80 md:h-96 overflow-hidden">
+      <div className="relative w-full h-screen overflow-hidden">
          {imageUrls.map((url, index) => (
             <div
                key={index}
@@ -49,29 +49,48 @@ const PageBanner = ({
          ))}
          <div className="absolute inset-0 bg-black/50"></div>
          <div className="relative z-10 h-full flex flex-col items-center justify-center text-white text-center p-4">
-            <h1 className="text-4xl md:text-5xl font-bold">{title}</h1>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">{title}</h1>
+            <p className="text-xl md:text-2xl max-w-2xl">
+               Khám phá thế giới ẩm thực đa dạng và tinh tế tại HotelHub
+            </p>
          </div>
       </div>
    );
 };
-const PageBannerStatic = ({
-   title,
-   imageUrl
-}: {
-   title: string;
-   imageUrl: string
-}) => {
+// Component: FoodIntro - PHẦN GIỚI THIỆU ẨM THỰC
+const FoodIntro = () => {
    return (
-      <div
-         className="relative w-full h-64 md:h-80 overflow-hidden"
-         style={{ backgroundImage: `url(${imageUrl})` }}
-      >
-         {/* Lớp phủ mờ */}
-         <div className="absolute inset-0 bg-black/50"></div>
-
-         {/* Nội dung */}
-         <div className="relative z-10 h-full flex flex-col items-center justify-center text-white text-center p-4">
-            <h1 className="text-4xl md:text-5xl font-bold">{title}</h1>
+      <div className="max-w-7xl mx-auto px-6 py-16 bg-white">
+         <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+               Ẩm Thực Đẳng Cấp - Hương Vị Tinh Tế
+            </h2>
+            <div className="w-24 h-1 bg-teal-500 mx-auto mb-6"></div>
+            <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
+               Tại <span className="font-semibold text-teal-600">HotelHub</span>, chúng tôi mang đến trải nghiệm ẩm thực đa dạng từ các nền văn hóa ẩm thực trên khắp thế giới.
+               Từ những món ăn truyền thống đậm đà hương vị Á Đông đến các món Âu sang trọng tinh tế, mỗi món ăn đều được chế biến tỉ mỉ
+               từ những nguyên liệu tươi ngon nhất, dưới bàn tay của các đầu bếp tài hoa. Hãy để chúng tôi đưa bạn vào hành trình khám phá
+               hương vị tuyệt vời ngay tại không gian ấm cúng của chúng tôi.
+            </p>
+         </div>
+      </div>
+   );
+};
+// Component: DrinkIntro - PHẦN GIỚI THIỆU THỨC UỐNG
+const DrinkIntro = () => {
+   return (
+      <div className="max-w-7xl mx-auto px-6 py-16 bg-white">
+         <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+               Thức Uống Tinh Tế - Cảm Giác Sảng Khoái
+            </h2>
+            <div className="w-24 h-1 bg-teal-500 mx-auto mb-6"></div>
+            <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
+               Khám phá thế giới thức uống đa dạng tại <span className="font-semibold text-teal-600">HotelHub</span>, từ những ly cocktail
+               nghệ thuật được pha chế tinh tế, các loại rượu vang cao cấp từ khắp nơi trên thế giới, đến những thức uống không cồn
+               tươi mát. Mỗi ly đồ uống là một tác phẩm nghệ thuật, kết hợp hài hòa giữa hương vị và thẩm mỹ, mang đến cho bạn
+               những trải nghiệm giác quan tuyệt vời trong không gian quầy bar sang trọng và ấm cúng.
+            </p>
          </div>
       </div>
    );
@@ -95,7 +114,7 @@ const CategorySection = ({
          ref={ref}
          className={`
         flex flex-col ${isReversed ? 'md:flex-row-reverse' : 'md:flex-row'}
-        items-center bg-white rounded-lg shadow-xl overflow-hidden
+        items-center bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-[#2fd680]
         transition-all duration-700 ease-out
         ${inView ? 'opacity-100 translate-x-0' : (isReversed ? 'opacity-0 translate-x-10' : 'opacity-0 -translate-x-10')}
       `}
@@ -110,14 +129,16 @@ const CategorySection = ({
             <p className="text-gray-600 leading-relaxed mb-4">{category.longDesc}</p>
             <button
                onClick={onOpenModal}
-               className="bg-blue-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-blue-700 transition-colors"
+               className="w-full flex items-center justify-center gap-2 font-semibold py-3 px-4 rounded-xl transition-all duration-300 bg-gradient-to-r from-teal-500 to-green-500 text-white hover:shadow-xl hover:scale-105"
             >
-               Xem chi tiết &raquo;
+               Xem chi tiết
+               <span>&raquo;</span>
             </button>
          </div>
       </div>
    );
 };
+
 
 // Component 3: DishCard 
 const DishCard = ({ dish }: { dish: Dish }) => {
@@ -134,7 +155,7 @@ const DishCard = ({ dish }: { dish: Dish }) => {
    }, [dish.images.length]);
 
    return (
-      <div className="border rounded-lg overflow-hidden shadow-sm bg-white flex flex-col">
+      <div className="border rounded-lg overflow-hidden shadow-sm bg-white flex flex-col h-full min-h-[380px]">
          <div className="relative w-full h-40 overflow-hidden">
             {dish.images.map((imgUrl, index) => (
                <img
@@ -152,10 +173,18 @@ const DishCard = ({ dish }: { dish: Dish }) => {
 
          {/* Phần nội dung */}
          <div className="p-4 flex flex-col flex-grow">
-            <h3 className="text-lg font-semibold">{dish.title}</h3>
-            <p className="text-sm text-gray-600 mt-1 flex-grow">{dish.desc}</p>
-            <p className="text-lg font-bold text-teal-600 mt-2">{dish.price}</p>
-            <button className="mt-4 w-full bg-teal-500 text-white font-bold py-2 rounded-lg hover:bg-teal-600 transition-colors">
+            <h3 className="text-lg font-semibold text-gray-800 line-clamp-2 h-14 mb-0">
+               {dish.title}
+            </h3>
+            <div className="flex-grow min-h-[60px] max-h-[80px] overflow-y-auto">
+               <p className="text-sm text-gray-600 leading-relaxed">
+                  {dish.desc}
+               </p>
+            </div>
+            <p className="text-lg font-bold text-teal-600 mt-3 mb-3">
+               {dish.price}
+            </p>
+            <button className="w-full bg-teal-500 text-white font-bold py-2 rounded-lg hover:bg-teal-600 transition-colors mt-auto">
                Đặt món
             </button>
          </div>
@@ -172,12 +201,43 @@ const CategoryModal = ({
    onClose: () => void;
 }) => {
    const [isVisible, setIsVisible] = useState(false);
-   useEffect(() => { setIsVisible(true); }, []);
+   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+   const searchRef = useRef<HTMLDivElement>(null);
+
+   useEffect(() => {
+      setIsVisible(true);
+   }, []);
 
    const handleClose = () => {
       setIsVisible(false);
       setTimeout(onClose, 300);
    };
+
+   const handleDishClick = (dishTitle: string) => {
+      // Cuộn đến món ăn được chọn
+      const dishElement = document.getElementById(`dish-${dishTitle.replace(/\s+/g, '-')}`);
+      if (dishElement) {
+         dishElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+         // Highlight món ăn được chọn
+         dishElement.classList.add('ring-2', 'ring-teal-500', 'transition-all', 'duration-300');
+         setTimeout(() => {
+            dishElement.classList.remove('ring-2', 'ring-teal-500');
+         }, 2000);
+      }
+      setIsDropdownOpen(false);
+   };
+
+   // Đóng dropdown khi click outside
+   useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+         if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+            setIsDropdownOpen(false);
+         }
+      };
+
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+   }, []);
 
    return createPortal(
       <div
@@ -186,7 +246,7 @@ const CategoryModal = ({
         fixed inset-0 flex items-center justify-center p-4
         transition-opacity duration-300 ease-out
         ${isVisible ? 'opacity-100' : 'opacity-0'}
-        z-[9999] // Đè lên Header
+        z-[9999]
       `}
          style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
       >
@@ -202,10 +262,76 @@ const CategoryModal = ({
             <h2 className="text-3xl font-bold text-gray-800 p-6 border-b">
                {category.title}
             </h2>
+
+            {/* DROPDOWN LIST */}
+            <div className="px-6 pt-4" ref={searchRef}>
+               <div className="relative">
+                  <button
+                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                     className="w-full flex items-center justify-between bg-white border-2 border-teal-500 rounded-lg shadow-sm px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                     <span className="font-medium">Chọn món nhanh</span>
+                     <svg
+                        className={`w-5 h-5 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                     >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                     </svg>
+                  </button>
+
+                  {/* DROPDOWN MENU - HIỂN THỊ TẤT CẢ MÓN */}
+                  {isDropdownOpen && (
+                     <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl mt-1 max-h-64 overflow-y-auto z-50">
+                        <div className="p-3 border-b border-gray-100 bg-teal-50">
+                           <p className="text-sm text-teal-700 font-medium">
+                              Danh sách món ({category.dishes.length})
+                           </p>
+                        </div>
+
+                        {category.dishes.map((dish) => (
+                           <div
+                              key={dish.id}
+                              onClick={() => handleDishClick(dish.title)}
+                              className="px-4 py-3 hover:bg-teal-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors group"
+                           >
+                              <div className="flex justify-between items-start">
+                                 <div className="flex-1">
+                                    <div className="font-medium text-gray-800 group-hover:text-teal-700">
+                                       {dish.title}
+                                    </div>
+                                    <div className="text-sm text-gray-600 mt-1 line-clamp-1">
+                                       {dish.desc}
+                                    </div>
+                                 </div>
+                                 <div className="text-right ml-3">
+                                    <div className="font-semibold text-teal-600 text-sm">
+                                       {dish.price}
+                                    </div>
+                                    <div className="text-xs text-gray-400 mt-1">
+                                       Click
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        ))}
+                     </div>
+                  )}
+               </div>
+            </div>
+
+            {/* DANH SÁCH MÓN ĂN */}
             <div className="p-6 overflow-y-auto">
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {category.dishes.map((dish) => (
-                     <DishCard key={dish.id} dish={dish} />
+                     <div
+                        key={dish.id}
+                        id={`dish-${dish.title.replace(/\s+/g, '-')}`}
+                        className="transition-all duration-300"
+                     >
+                        <DishCard dish={dish} />
+                     </div>
                   ))}
                </div>
             </div>
@@ -222,7 +348,7 @@ const CategoryModal = ({
    );
 };
 
-// Component chính: Food (Trang Ẩm thực)
+// Component chính: Food 
 export default function Food() {
 
    // State quản lý 2 loại popup
@@ -235,7 +361,7 @@ export default function Food() {
          id: "asia",
          title: "Ẩm thực Châu Á",
          longDesc: "Khám phá hương vị đậm đà, tinh tế từ các nền ẩm thực hàng đầu châu Á. Từ Phở bò Việt Nam, Sushi Nhật Bản đến Tom Yum Thái Lan, mỗi món ăn là một hành trình.",
-         img: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=800&q=60", // Ảnh Sashimi
+         img: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=800&q=60",
          dishes: [
             { id: 1, title: "Phở bò", desc: "Nước dùng ninh 8 tiếng, thịt bò mềm, bánh phở tươi. Một trải nghiệm ẩm thực tinh túy của Việt Nam.", images: ["https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074", "https://images.unsplash.com/photo-1511910849309-0dffb8785146?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8cGglRTElQkIlOUZ8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600"], price: "95.000 VNĐ" },
             { id: 2, title: "Sashimi Set", desc: "Cá hồi Na-uy, cá ngừ vây xanh và sò điệp Hokkaido tươi sống, nhập khẩu trực tiếp mỗi ngày.", images: ["https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=800&q=60", "https://images.unsplash.com/photo-1724115862102-ca5de83eff8b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fHNldCUyMHNhc2hpbWl8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600"], price: "250.000 VNĐ" },
@@ -315,9 +441,11 @@ export default function Food() {
                "https://images.unsplash.com/photo-1551028150-64b9f398f678?auto=format&fit=crop&w=1200&q=80",
             ]}
          />
+         {/* PHẦN GIỚI THIỆU ẨM THỰC */}
+         <FoodIntro />
 
          {/* KHỐI 2: CÁC KHỐI XEN KẼ */}
-         <div className="max-w-7xl mx-auto p-6 bg-gray-50 space-y-16">
+         <div className="max-w-7xl mx-auto p-6 space-y-16">
             {foodCategories.map((category, index) => (
                <CategorySection
                   key={category.id}
@@ -328,16 +456,21 @@ export default function Food() {
             ))}
          </div>
 
+         {/* BANNER THỨC UỐNG TOÀN MÀN HÌNH */}
+         <PageBanner
+            title="Thức uống & Quầy Bar"
+            imageUrls={[
+               "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1200&q=80",
+               "https://media.gettyimages.com/id/1153582461/photo/modern-empty-night-bar-wide-angle-near-bar-counter.jpg?s=612x612&w=0&k=20&c=M556X_uZNGLk8MddpEr0DuHEXtacxXaPUkJTqOTZ_XI=",
+               "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=1200&q=80",
+            ]}
+         />
+
+         {/* PHẦN GIỚI THIỆU THỨC UỐNG */}
+         <DrinkIntro />
+
          {/* KHỐI 3: KHU VỰC THỨC UỐNG */}
-         <div className="max-w-7xl mx-auto p-6 bg-gray-50 space-y-16">
-            {/* Tiêu đề cho Thức uống */}
-            <PageBannerStatic
-               title="Thức uống & Quầy Bar"
-               imageUrl="https://media.istockphoto.com/id/639636168/vi/anh/%C4%91%E1%BB%93-u%E1%BB%91ng-cocktail-tr%C3%AAn-qu%E1%BA%A7y-bar.jpg?s=2048x2048&w=is&k=20&c=0XWkJ82YTpSd26AWvlRZYvB0IiSqqfZljK7E8gL2evM="
-            />
-
-
-            {/* Lưới Thức uống */}
+         <div className="max-w-7xl mx-auto p-6 space-y-16">
             {drinkCategories.map((category, index) => (
                <CategorySection
                   key={category.id}
@@ -349,20 +482,24 @@ export default function Food() {
          </div>
 
          {/* Render Modal 1 (cho Á/Âu) */}
-         {selectedFoodCategory && (
-            <CategoryModal
-               category={selectedFoodCategory}
-               onClose={() => setSelectedFoodCategory(null)}
-            />
-         )}
+         {
+            selectedFoodCategory && (
+               <CategoryModal
+                  category={selectedFoodCategory}
+                  onClose={() => setSelectedFoodCategory(null)}
+               />
+            )
+         }
 
          {/* Render Modal 2 (cho Thức Uống) */}
-         {selectedDrinkCategory && (
-            <CategoryModal
-               category={selectedDrinkCategory}
-               onClose={() => setSelectedDrinkCategory(null)}
-            />
-         )}
+         {
+            selectedDrinkCategory && (
+               <CategoryModal
+                  category={selectedDrinkCategory}
+                  onClose={() => setSelectedDrinkCategory(null)}
+               />
+            )
+         }
       </>
    );
 }

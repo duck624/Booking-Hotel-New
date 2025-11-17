@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useInView } from "react-intersection-observer";
@@ -37,7 +36,7 @@ const PageBanner = ({
 
   return (
     <div
-      className="relative w-full h-80 md:h-96 overflow-hidden"
+      className="relative w-full h-screen overflow-hidden"
     >
       {imageUrls.map((url, index) => (
         <div
@@ -56,9 +55,142 @@ const PageBanner = ({
       {/* Lớp phủ mờ */}
       <div className="absolute inset-0 bg-black/50"></div>
 
-      {/* Nội dung (Tiêu đề)*/}
+      {/* Nội dung (Tiêu đề) */}
       <div className="relative z-10 h-full flex flex-col items-center justify-center text-white text-center p-4">
-        <h1 className="text-4xl md:text-5xl font-bold">{title}</h1>
+        <h1 className="text-4xl md:text-6xl font-bold mb-4">{title}</h1>
+        <p className="text-xl md:text-2xl max-w-2xl">
+          Trải nghiệm những tiện ích đẳng cấp và dịch vụ chuyên nghiệp tại HotelHub
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// Component: ServiceIntro 
+const ServiceIntro = ({
+  onServiceSelect,
+  services
+}: {
+  onServiceSelect: (service: Service) => void;
+  services: Service[];
+}) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Dữ liệu dịch vụ cho dropdown 
+  const dropdownServices = services.map(service => ({
+    id: service.id,
+    title: service.title
+  }));
+
+  const filteredServices = dropdownServices.filter(service =>
+    service.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleServiceClick = (serviceTitle: string) => {
+    // Tìm service đầy đủ từ services array
+    const fullService = services.find(s => s.title === serviceTitle);
+    if (fullService) {
+      onServiceSelect(fullService);
+      setIsDropdownOpen(false);
+      setSearchTerm('');
+    }
+  };
+
+  // Đóng dropdown khi click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="max-w-7xl mx-auto px-6 py-16 bg-white">
+      <div className="text-center mb-12">
+        <h2 className="text-4xl font-bold text-gray-800 mb-4">
+          Dịch vụ & Trải nghiệm khác biệt
+        </h2>
+        <div className="w-24 h-1 bg-teal-500 mx-auto mb-6"></div>
+        <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
+          Tại <span className="font-semibold text-teal-600">HotelHub</span>, chúng tôi không chỉ cung cấp chỗ ở mà còn mang đến những trải nghiệm đáng nhớ.
+          Từ những dịch vụ cơ bản nhất đến những tiện ích cao cấp, mọi thứ đều được chăm chút tỉ mỉ để đảm bảo
+          kỳ nghỉ của bạn thực sự trọn vẹn và thoải mái. Khám phá các dịch vụ đa dạng được thiết kế riêng cho nhu cầu của bạn.
+        </p>
+      </div>
+
+      {/* THANH SEARCH DROPDOWN */}
+      <div className="max-w-2xl mx-auto mb-12" ref={dropdownRef}>
+        <div className="relative">
+          <div className="flex items-center bg-white border-2 border-teal-500 rounded-lg shadow-lg overflow-hidden">
+            <input
+              type="text"
+              placeholder="Tìm kiếm dịch vụ..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setIsDropdownOpen(true);
+              }}
+              onFocus={() => setIsDropdownOpen(true)}
+              className="w-full px-4 py-3 text-gray-700 focus:outline-none"
+            />
+            <button className="px-4 text-gray-600">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+          </div>
+
+          {/* DROPDOWN MENU */}
+          {isDropdownOpen && (
+            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl mt-1 max-h-60 overflow-y-auto z-50">
+              {filteredServices.length > 0 ? (
+                filteredServices.map((service) => (
+                  <div
+                    key={service.id}
+                    onClick={() => handleServiceClick(service.title)}
+                    className="px-4 py-3 hover:bg-teal-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+                  >
+                    <div className="font-medium text-gray-800">{service.title}</div>
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-3 text-gray-500 text-center">
+                  Không tìm thấy dịch vụ phù hợp
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Các điểm nổi bật về dịch vụ */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+        <div className="bg-gradient-to-br from-teal-50 to-blue-50 rounded-xl p-6 shadow-lg border border-teal-100 text-center transform hover:-translate-y-1 transition-transform duration-300">
+          <h3 className="text-xl font-bold text-gray-800 mb-3">Tiện nghi hiện đại</h3>
+          <p className="text-gray-600 leading-relaxed">
+            Hệ thống trang thiết bị đầy đủ, công nghệ tiên tiến phục vụ mọi nhu cầu của bạn
+          </p>
+        </div>
+
+        <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 shadow-lg border border-blue-100 text-center transform hover:-translate-y-1 transition-transform duration-300">
+          <h3 className="text-xl font-bold text-gray-800 mb-3">Chuyên nghiệp</h3>
+          <p className="text-gray-600 leading-relaxed">
+            Đội ngũ nhân viên được đào tạo bài bản, luôn sẵn sàng phục vụ 24/7
+          </p>
+        </div>
+
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 shadow-lg border border-purple-100 text-center transform hover:-translate-y-1 transition-transform duration-300">
+          <h3 className="text-xl font-bold text-gray-800 mb-3">Đa dạng</h3>
+          <p className="text-gray-600 leading-relaxed">
+            Nhiều loại hình dịch vụ từ cơ bản đến cao cấp, đáp ứng mọi yêu cầu
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -114,7 +246,7 @@ const ServiceCard = ({
   );
 };
 
-// Component con 2: ServiceModal (Popup chi tiết)
+// Component con 2: ServiceModal 
 const ServiceModal = ({
   service,
   onClose,
@@ -145,6 +277,8 @@ const ServiceModal = ({
         fixed inset-0 flex items-center justify-center p-4
         transition-opacity duration-300 ease-out
         ${isVisible ? 'opacity-100' : 'opacity-0'}
+        
+        z-[9999]
       `}
       style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
     >
@@ -196,25 +330,38 @@ const ServiceModal = ({
               </div>
             )}
             <button className="w-full bg-teal-500 text-white font-bold py-3 rounded-lg hover:bg-teal-600 transition-colors mt-auto">
-              Đặt Dịch Vụ Này
+              Đặt dịch vụ
             </button>
           </div>
         </div>
 
         {/* PHẦN MÔ TẢ & QUY TRÌNH */}
-        <div className="p-6 overflow-y-auto">
-          <h4 className="text-xl font-semibold text-gray-800 mb-2">Mô tả chi tiết</h4>
-          <p className="text-gray-600 leading-relaxed mb-4">{service.longDesc}</p>
+        <div className="p-6 overflow-y-auto space-y-4">
+          {/* CONTAINER MÔ TẢ CHI TIẾT */}
+          <div className="bg-gradient-to-br from-teal-50 to-blue-50 rounded-xl p-6 border border-teal-200 shadow-sm">
+            <h4 className="text-xl font-semibold text-gray-800 mb-3">
+              Mô tả chi tiết
+            </h4>
+            <p className="text-gray-700 leading-relaxed">{service.longDesc}</p>
+          </div>
 
+          {/* CONTAINER QUY TRÌNH THỰC HIỆN */}
           {service.process && service.process.length > 0 && (
-            <>
-              <h4 className="text-xl font-semibold text-gray-800 mb-2">Quy trình thực hiện</h4>
-              <ul className="list-decimal list-inside text-gray-600 space-y-1">
+            <div className="bg-gradient-to-br from-teal-50 to-blue-50 rounded-xl p-6 border border-teal-200 shadow-sm">
+              <h4 className="text-xl font-semibold text-gray-800 mb-3">
+                Quy trình thực hiện
+              </h4>
+              <ul className="space-y-3">
                 {service.process.map((step, index) => (
-                  <li key={index}>{step}</li>
+                  <li key={index} className="flex items-start">
+                    <span className="flex-shrink-0 w-6 h-6 bg-teal-500 text-white rounded-full flex items-center justify-center text-sm font-medium mr-3 mt-0.5">
+                      {index + 1}
+                    </span>
+                    <span className="text-gray-700 leading-relaxed">{step}</span>
+                  </li>
                 ))}
               </ul>
-            </>
+            </div>
           )}
         </div>
 
@@ -230,10 +377,14 @@ const ServiceModal = ({
     document.body
   );
 };
-
 // Component chính: Services (Trang Dịch Vụ)
 export default function Services() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+
+  // Hàm xử lý khi chọn dịch vụ từ search dropdown
+  const handleServiceSelect = (service: Service) => {
+    setSelectedService(service);
+  };
 
   // 1. DỮ LIỆU: 
   const services: Service[] = [
@@ -376,29 +527,47 @@ export default function Services() {
 
   return (
     <>
+      {/* BANNER TOÀN MÀN HÌNH */}
       <PageBanner
         title="Dịch vụ"
         imageUrls={[
-          // 3. Mảng 3 ảnh cho Banner Slider
           "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80",
           "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1200&q=80",
           "https://images.unsplash.com/photo-1544986581-efac024faf62?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
         ]}
       />
 
-      {/* KHỐI 2: NỘI DUNG TRANG (Lưới thẻ + Popup) */}
-      <div className="max-w-7xl mx-auto p-6 bg-gray-50">
+      {/* PHẦN GIỚI THIỆU DỊCH VỤ TỔNG QUAN VỚI SEARCH */}
+      <ServiceIntro
+        onServiceSelect={handleServiceSelect}
+        services={services}
+      />
 
-        {/* 4. Đổi lưới thành 3 cột trên 'lg' (desktop) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
-          {services.map((service, index) => (
-            <ServiceCard
-              key={service.id}
-              service={service}
-              index={index}
-              onClick={() => setSelectedService(service)}
-            />
-          ))}
+      {/* KHỐI 2: NỘI DUNG TRANG */}
+      <div className="max-w-7xl mx-auto p-6">
+
+        {/* KHUNG VIỀN PHẦN DỊCH VỤ */}
+        <div className="border-2 border-[#2fd680] rounded-2xl p-8 bg-white shadow-lg">
+
+          {/* Tiêu đề cho danh sách dịch vụ */}
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">Khám phá các dịch vụ của chúng tôi</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Từ những tiện ích cơ bản đến dịch vụ cao cấp, mọi thứ đều được thiết kế để mang đến trải nghiệm tốt nhất cho bạn
+            </p>
+          </div>
+
+          {/* Lưới dịch vụ */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {services.map((service, index) => (
+              <ServiceCard
+                key={service.id}
+                service={service}
+                index={index}
+                onClick={() => setSelectedService(service)}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Render Modal */}
