@@ -463,40 +463,94 @@ export default function PromotionsPage() {
       </section>
 
       {/* MODAL CHI TIẾT ƯU ĐÃI */}
+           {/* MODAL CHI TIẾT ƯU ĐÃI – PHIÊN BẢN SIÊU SANG, CÓ NHẬP MÃ */}
       {selectedPromo && (
         <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-md flex items-center justify-center p-4" onClick={() => setSelectedPromo(null)}>
-          <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className={`h-48 bg-gradient-to-br ${selectedPromo.bgGradient} flex items-center justify-center text-white relative`}>
+          <div 
+            className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header gradient + icon + nút đóng X trong suốt */}
+            <div className={`relative h-56 bg-gradient-to-br ${selectedPromo.bgGradient} flex items-center justify-center text-white`}>
               {selectedPromo.icon}
-              <button onClick={() => setSelectedPromo(null)} className="absolute top-6 right-6 bg-white/20 hover:bg-white/30 p-3 rounded-full">
-                <X className="w-7 h-7" />
+              <button 
+                onClick={() => setSelectedPromo(null)} 
+                className="absolute top-6 right-6 text-white/80 hover:text-white hover:scale-110 transition-all"
+              >
+                <X className="w-8 h-8" />
               </button>
             </div>
-            <div className="p-10">
-              <h2 className="text-4xl font-bold mb-6">{selectedPromo.title}</h2>
-              <div className="space-y-6 text-lg">
-                <p className="text-3xl font-bold text-teal-600">{selectedPromo.details.discount}</p>
-                {selectedPromo.details.extraDiscount && <p className="text-green-600 font-medium">{selectedPromo.details.extraDiscount}</p>}
-                <div className="grid grid-cols-2 gap-6">
-                  <div><p className="text-gray-600">Từ ngày</p><p className="font-bold">{selectedPromo.details.validFrom}</p></div>
-                  <div><p className="text-gray-600">Đến ngày</p><p className="font-bold">{selectedPromo.details.validTo}</p></div>
+
+            {/* Nội dung cuộn đẹp */}
+            <div className="flex-1 overflow-y-auto px-10 py-8 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+              <h2 className="text-4xl font-bold mb-6 text-gray-800">{selectedPromo.title}</h2>
+              
+              <div className="space-y-8 text-lg">
+                <div className="text-center py-6 bg-gradient-to-r from-teal-50 to-green-50 rounded-2xl">
+                  <p className="text-4xl font-bold text-teal-600">{selectedPromo.details.discount}</p>
+                  {selectedPromo.details.extraDiscount && (
+                    <p className="text-xl text-green-700 mt-3 font-medium">{selectedPromo.details.extraDiscount}</p>
+                  )}
                 </div>
-                <div><p className="text-gray-600 mb-2">Áp dụng cho</p><p className="font-bold">{selectedPromo.details.applicableRooms}</p></div>
+
+                <div className="grid grid-cols-2 gap-8">
+                  <div className="bg-gray-50 rounded-2xl p-6 text-center">
+                    <p className="text-gray-600">Từ ngày</p>
+                    <p className="text-2xl font-bold text-gray-800">{selectedPromo.details.validFrom}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-2xl p-6 text-center">
+                    <p className="text-gray-600">Đến ngày</p>
+                    <p className="text-2xl font-bold text-gray-800">{selectedPromo.details.validTo}</p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-2xl p-6">
+                  <p className="text-gray-600 mb-2">Áp dụng cho</p>
+                  <p className="text-xl font-bold text-teal-600">{selectedPromo.details.applicableRooms}</p>
+                </div>
+
                 <div>
-                  <p className="font-bold mb-3">Điều kiện:</p>
-                  <ul className="space-y-2">
+                  <p className="font-bold text-xl mb-4 text-gray-800">Điều kiện áp dụng:</p>
+                  <ul className="space-y-3">
                     {selectedPromo.details.conditions.map((c, i) => (
-                      <li key={i} className="flex items-start gap-3">
-                        <Ticket className="w-5 h-5 text-teal-600 mt-0.5" />
-                        {c}
+                      <li key={i} className="flex items-start gap-3 text-gray-700">
+                        <Ticket className="w-6 h-6 text-teal-600 mt-0.5 flex-shrink-0" />
+                        <span>{c}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
               </div>
-              <button onClick={() => setSelectedPromo(null)} className="mt-10 w-full bg-gradient-to-r from-teal-500 to-green-500 text-white font-bold py-5 rounded-xl hover:scale-105 transition-all">
-                Đóng
-              </button>
+            </div>
+
+            {/* Footer nhập mã – cố định dưới cùng */}
+            <div className="border-t border-gray-200 bg-gray-50 px-10 py-8">
+              <div className="max-w-md mx-auto">
+                <label className="block text-lg font-semibold text-gray-800 mb-3">Nhập mã ưu đãi của bạn</label>
+                <div className="flex gap-4">
+                  <input
+                    type="text"
+                    placeholder="VD: MV2025GOLD"
+                    className="flex-1 px-6 py-4 rounded-xl border-2 border-gray-300 focus:border-teal-500 outline-none text-lg font-medium transition-all"
+                    onChange={(e) => {
+                      const value = e.target.value.trim().toUpperCase();
+                      // Bạn có thể thêm logic kiểm tra mã hợp lệ ở đây sau
+                    }}
+                  />
+                  <button
+                    disabled={true} // bật khi có mã hợp lệ
+                    className="px-10 py-4 rounded-xl font-bold text-white transition-all 
+                      bg-gray-400 cursor-not-allowed 
+                      disabled:bg-gray-400 disabled:cursor-not-allowed
+                      hover:bg-teal-600 hover:scale-105"
+                  >
+                    Áp dụng
+                  </button>
+                </div>
+                <p className="text-sm text-gray-500 mt-3 text-center">
+                  Chưa có mã? Nhận mã tại phần <span className="font-semibold text-teal-600">Nhập ID nhận ưu đãi</span> bên trên
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -557,6 +611,107 @@ export default function PromotionsPage() {
           </div>
         </div>
       )}
+            {/* ==================== PHẦN QUY ĐỔI ĐIỂM THƯỞNG – SIÊU ĐẸP ==================== */}
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-5xl font-bold text-center mb-16">Cách kiếm & Quy đổi điểm thưởng</h2>
+
+          <div className="grid lg:grid-cols-2 gap-12">
+
+            {/* CÁCH KIẾM ĐIỂM */}
+            <div className="bg-white rounded-3xl shadow-2xl p-10">
+              <h3 className="text-3xl font-bold mb-8 text-teal-600 flex items-center gap-4">
+                <Sparkles className="w-10 h-10 text-amber-400" />
+                Cách kiếm điểm thưởng
+              </h3>
+              <div className="space-y-6">
+                {[
+                  { action: "Ở lại thêm mỗi đêm", points: "+100 điểm / đêm" },
+                  { action: "Đặt phòng trực tuyến", points: "+50 điểm / đặt phòng" },
+                  { action: "Sử dụng dịch vụ Spa & Nhà hàng", points: "+10 điểm / 100.000đ chi tiêu" },
+                  { action: "Giới thiệu bạn bè đặt phòng", points: "+500 điểm / người thành công" },
+                  { action: "Tham gia trò chơi trên trang", points: "Tới 2.000 điểm / lượt" },
+                  { action: "Đánh giá sau khi trải nghiệm", points: "+200 điểm / đánh giá" },
+                ].map((item, i) => (
+                  <div key={i} className="flex justify-between items-center py-5 px-6 bg-gradient-to-r from-teal-50 to-green-50 rounded-2xl border border-teal-100">
+                    <p className="text-lg font-medium text-gray-800">{item.action}</p>
+                    <span className="text-xl font-bold text-teal-600">{item.points}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* QUY ĐỔI ĐIỂM */}
+            <div className="bg-white rounded-3xl shadow-2xl p-10">
+              <h3 className="text-3xl font-bold mb-8 text-amber-600 flex items-center gap-4">
+                <Gift className="w-10 h-10 text-pink-500" />
+                Quy đổi điểm thưởng
+              </h3>
+              <div className="space-y-6">
+                {[
+                  { gift: "Voucher giảm 200.000đ", points: 2000, color: "from-teal-500 to-green-500" },
+                  { gift: "Spa miễn phí 60 phút", points: 3500, color: "from-purple-500 to-pink-500" },
+                  { gift: "Gấu bông M Village chính hãng", points: 5000, color: "from-rose-500 to-pink-500" },
+                  { gift: "Bữa tối lãng mạn 2 người", points: 8000, color: "from-orange-500 to-red-500" },
+                  { gift: "1 đêm nghỉ miễn phí (Deluxe)", points: 15000, color: "from-amber-500 to-yellow-500" },
+                  { gift: "Chuyển thành tiền mặt", points: 1000, per: "100.000đ", special: true },
+                ].map((item, i) => (
+                  <div key={i} className={`p-6 rounded-2xl border-2 ${item.special ? "border-dashed border-amber-400 bg-amber-50" : "border-gray-200"}`}>
+                    <div className="flex justify-between items-center mb-3">
+                      <p className="text-lg font-semibold text-gray-800">{item.gift}</p>
+                      <span className="text-2xl font-bold text-amber-600">{item.points.toLocaleString()} điểm</span>
+                    </div>
+                    {item.special ? (
+                      <div className="mt-4 space-y-4">
+                        <p className="text-sm text-gray-600">→ 1.000 điểm = 100.000 ₫ chuyển khoản</p>
+                        <input
+                          type="text"
+                          placeholder="Nhập số tài khoản ngân hàng"
+                          className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:border-amber-500 outline-none text-center"
+                        />
+                        <div className="flex justify-center gap-6 items-center">
+                          <div className="bg-gray-200 border-2 border-dashed rounded-xl w-32 h-32 flex items-center justify-center">
+                            <span className="text-xs text-gray-500 text-center">QR Code<br/>ngân hàng</span>
+                          </div>
+                          <button
+                            disabled={points < item.points}
+                            className={`px-8 py-4 rounded-xl font-bold text-white transition-all ${
+                              points >= item.points
+                                ? "bg-gradient-to-r from-amber-500 to-orange-600 hover:scale-105 shadow-lg"
+                                : "bg-gray-400 cursor-not-allowed"
+                            }`}
+                          >
+                            {points >= item.points ? "Chuyển khoản ngay" : "Chưa đủ điểm"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        disabled={points < item.points}
+                        className={`w-full mt-3 py-4 rounded-xl font-bold text-white transition-all ${
+                          points >= item.points
+                            ? `bg-gradient-to-r ${item.color} hover:scale-105 shadow-lg`
+                            : "bg-gray-400 cursor-not-allowed"
+                        }`}
+                      >
+                        {points >= item.points ? "Đổi ngay" : `Còn thiếu ${item.points - points} điểm`}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Ghi chú nhỏ */}
+          <div className="mt-16 text-center">
+            <p className="text-lg text-gray-600">
+              Điểm thưởng có giá trị trong <strong>12 tháng</strong> kể từ ngày tích lũy • 
+              Mọi thắc mắc vui lòng liên hệ <strong className="text-teal-600">1900 1234</strong>
+            </p>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
